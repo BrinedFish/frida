@@ -112,19 +112,19 @@ if [ -z "$FRIDA_HOST" ]; then
 fi
 
 if [ $host_platform = android ]; then
-  ndk_required_name="r20"
+  ndk_required=21
   if [ -n "$ANDROID_NDK_ROOT" ]; then
     if [ -f "$ANDROID_NDK_ROOT/source.properties" ]; then
       ndk_installed_version=$(grep Pkg.Revision "$ANDROID_NDK_ROOT/source.properties" | awk '{ split($NF, v, "."); print v[1]; }')
     else
       ndk_installed_version=$(cut -f1 -d" " "$ANDROID_NDK_ROOT/RELEASE.TXT")
     fi
-    if [ $ndk_installed_version -ne 20 ]; then
+    if [ $ndk_installed_version -ne $ndk_required ]; then
       (
         echo ""
-        echo "Unsupported NDK version $ndk_installed_version. Please install NDK $ndk_required_name."
+        echo "Unsupported NDK version $ndk_installed_version. Please install NDK r$ndk_required."
         echo ""
-        echo "Frida's SDK - the prebuilt dependencies snapshot - was compiled against $ndk_required_name,"
+        echo "Frida's SDK - the prebuilt dependencies snapshot - was compiled against r$ndk_required,"
         echo "and as we have observed the NDK ABI breaking over time, we ask that you install"
         echo "the exact same version."
         echo ""
@@ -713,7 +713,7 @@ ACLOCAL="aclocal $ACLOCAL_FLAGS"
 CONFIG_SITE="$FRIDA_BUILD/${frida_env_name_prefix}config-${host_platform_arch}.site"
 
 VALAC="$FRIDA_BUILD/${FRIDA_ENV_NAME:-frida}-${host_platform_arch}-valac"
-vala_impl="$FRIDA_TOOLROOT/bin/valac-0.46"
+vala_impl="$FRIDA_TOOLROOT/bin/valac-0.50"
 vala_flags="--vapidir=\"$FRIDA_PREFIX/share/vala/vapi\""
 if [ "$FRIDA_ENV_SDK" != 'none' ]; then
   vala_flags="$vala_flags --vapidir=\"$FRIDA_SDKROOT/share/vala/vapi\""
@@ -749,12 +749,12 @@ if ! grep -Eq "^$toolchain_version\$" "$FRIDA_TOOLROOT/.version" 2>/dev/null; th
       "$template" > "$target"
   done
 
-  vala_wrapper=$FRIDA_TOOLROOT/bin/valac-0.46
-  vala_impl=$FRIDA_TOOLROOT/bin/valac-0.46-impl
+  vala_wrapper=$FRIDA_TOOLROOT/bin/valac-0.50
+  vala_impl=$FRIDA_TOOLROOT/bin/valac-0.50-impl
   mv "$vala_wrapper" "$vala_impl"
   (
     echo "#!/bin/sh"
-    echo "exec \"$vala_impl\" --target-glib=2.62 \"\$@\" --vapidir=\"$FRIDA_TOOLROOT/share/vala-0.46/vapi\""
+    echo "exec \"$vala_impl\" --target-glib=2.66 \"\$@\" --vapidir=\"$FRIDA_TOOLROOT/share/vala-0.50/vapi\""
   ) > "$vala_wrapper"
   chmod 755 "$vala_wrapper"
 
@@ -892,14 +892,35 @@ case $host_platform in
 esac
 
 egrep -v "^export LD=" "$env_rc" > "$meson_env_rc"
+(
+  echo "export CC_LD=\"$LD\""
+  echo "export CXX_LD=\"$LD\""
+) >> $meson_env_rc
+case $host_platform in
+  macos|ios)
+    (
+      echo "export OBJC_LD=\"$LD\""
+      echo "export OBJCXX_LD=\"$LD\""
+    ) >> $meson_env_rc
+    ;;
+esac
+if [ "$host_platform" != "$build_platform" ]; then
+  build_env_rc=build/${FRIDA_ENV_NAME:-frida}-meson-env-${build_platform_arch}.rc
+  if [ ! -f $build_env_rc ]; then
+    FRIDA_HOST=${build_platform_arch} releng/setup-env.sh
+  fi
+  egrep "^export (PKG_CONFIG_PATH|CC|CXX|OBJC|OBJCXX|CPPFLAGS|CFLAGS|CXXFLAGS|CC_LD|CXX_LD|OBJC_LD|OBJCXX_LD|LDFLAGS|AR)=" $build_env_rc \
+    | sed -e "s,=,_FOR_BUILD=," \
+    >> $meson_env_rc
+fi
 
 sed \
   -e "s,@frida_host_platform@,$host_platform,g" \
   -e "s,@frida_host_arch@,$host_arch,g" \
   -e "s,@frida_host_platform_arch@,$host_platform_arch,g" \
   -e "s,@frida_prefix@,$FRIDA_PREFIX,g" \
-  -e "s,@frida_optimization_flags@,$FRIDA_OPTIMIZATION_FLAGS,g" \
-  -e "s,@frida_debug_flags@,$FRIDA_DEBUG_FLAGS,g" \
+  -e "s,@frida_optimization_flags@,$FRIDA_ACOPTFLAGS,g" \
+  -e "s,@frida_debug_flags@,$FRIDA_ACDBGFLAGS,g" \
   -e "s,@frida_libc@,$libc,g" \
   $releng_path/config.site.in > "$CONFIG_SITE"
 

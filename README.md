@@ -55,7 +55,7 @@ To ensure that macOS accepts the newly created certificate, restart the
 
     frida.sln
 
-(Requires Visual Studio 2017.)
+(Requires Visual Studio 2019.)
 
 See [https://www.frida.re/docs/building/](https://www.frida.re/docs/building/)
 for details.
