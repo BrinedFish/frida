@@ -107,7 +107,7 @@ def build_meson_modules(platform, configuration):
         ("glib-schannel", "gioschannel.pc", []),
         ("libgee", "gee-0.8.pc", []),
         ("json-glib", "json-glib-1.0.pc", ["introspection=disabled", "tests=false"]),
-        ("libpsl", "libpsl.pc", []),
+        ("libpsl", "libpsl.pc", ["tests=false"]),
         ("libxml2", "libxml-2.0.pc", []),
         ("libsoup", "libsoup-2.4.pc", ["gssapi=disabled", "tls_check=false", "gnome=false", "introspection=disabled", "vapi=disabled", "tests=false"]),
         ("vala", VALAC_FILENAME, []),
