@@ -254,7 +254,7 @@ build/ft-%/bin/libtool: build/ft-env-%.rc build/ft-tmp-%/libtool/Makefile
 		&& make $(MAKE_J) install
 	@touch $@
 
-$(eval $(call make-tarball-module-rules,gettext,https://$(gnu_mirror)/gettext/gettext-$(gettext_version).tar.gz,build/ft-%/bin/autopoint,build/ft-%/bin/libtool,))
+$(eval $(call make-tarball-module-rules,gettext,https://$(gnu_mirror)/gettext/gettext-$(gettext_version).tar.gz,build/ft-%/bin/autopoint,build/ft-%/bin/libtool,gettext-static-only.patch))
 
 $(eval $(call make-git-meson-module-rules,zlib,build/ft-%/lib/pkgconfig/zlib.pc,))
 
