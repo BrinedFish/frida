@@ -191,6 +191,7 @@ meson_root=""
 
 meson_objc=""
 meson_objcpp=""
+meson_linker_flavor=""
 
 meson_platform_properties=()
 
@@ -487,26 +488,26 @@ case $host_platform in
         android_api=18
         host_compiler_triplet="i686-linux-android"
         host_arch_flags="-march=i686"
-        host_ldflags="-fuse-ld=gold"
+        host_ldflags=""
         ;;
       x86_64)
         android_api=21
         host_compiler_triplet="x86_64-linux-android"
         host_arch_flags=""
-        host_ldflags="-fuse-ld=gold -Wl,--icf=all"
+        host_ldflags="-Wl,--icf=all"
         ;;
       arm)
         android_api=18
         host_compiler_triplet="armv7a-linux-androideabi"
         host_tooltriplet="arm-linux-androideabi"
         host_arch_flags="-march=armv7-a -mfloat-abi=softfp -mfpu=vfpv3-d16"
-        host_ldflags="-fuse-ld=gold -Wl,--icf=all -Wl,--fix-cortex-a8"
+        host_ldflags="-Wl,--icf=all -Wl,--fix-cortex-a8"
         ;;
       arm64)
         android_api=21
         host_compiler_triplet="aarch64-linux-android"
         host_arch_flags=""
-        host_ldflags="-fuse-ld=gold -Wl,--icf=all"
+        host_ldflags="-Wl,--icf=all"
         ;;
     esac
     host_compiler_prefix="${host_compiler_triplet}${android_api}-"
@@ -535,7 +536,8 @@ case $host_platform in
     OBJDUMP="${android_toolroot}/bin/${host_toolprefix}objdump"
 
     CFLAGS="$host_arch_flags -DANDROID -ffunction-sections -fdata-sections"
-    LDFLAGS="$host_arch_flags $host_ldflags -Wl,--gc-sections -Wl,-z,noexecstack -Wl,-z,relro -Wl,-z,now"
+    LDFLAGS="$host_arch_flags -fuse-ld=gold $host_ldflags -Wl,--gc-sections -Wl,-z,noexecstack -Wl,-z,relro -Wl,-z,now"
+    meson_linker_flavor=gold
 
     elf_cleaner=${FRIDA_ROOT}/releng/frida-elf-cleaner-${build_platform_arch}
 
@@ -892,18 +894,20 @@ case $host_platform in
 esac
 
 egrep -v "^export LD=" "$env_rc" > "$meson_env_rc"
-(
-  echo "export CC_LD=\"$LD\""
-  echo "export CXX_LD=\"$LD\""
-) >> $meson_env_rc
-case $host_platform in
-  macos|ios)
-    (
-      echo "export OBJC_LD=\"$LD\""
-      echo "export OBJCXX_LD=\"$LD\""
-    ) >> $meson_env_rc
-    ;;
-esac
+if [ -n "$meson_linker_flavor" ]; then
+  (
+    echo "export CC_LD=$meson_linker_flavor"
+    echo "export CXX_LD=$meson_linker_flavor"
+  ) >> $meson_env_rc
+  case $host_platform in
+    macos|ios)
+      (
+        echo "export OBJC_LD=$meson_linker_flavor"
+        echo "export OBJCXX_LD=$meson_linker_flavor"
+      ) >> $meson_env_rc
+      ;;
+  esac
+fi
 if [ "$host_platform" != "$build_platform" ]; then
   build_env_rc=build/${FRIDA_ENV_NAME:-frida}-meson-env-${build_platform_arch}.rc
   if [ ! -f $build_env_rc ]; then
