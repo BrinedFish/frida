@@ -583,8 +583,7 @@ v8-checkout/.gclient: v8-checkout/depot_tools/gclient
     "deps_file": "DEPS", \
     "custom_deps": {}, \
   }, \
-] \
-'
+]'
 
 v8-checkout/v8: v8-checkout/.gclient
 	cd v8-checkout && PATH=$(abspath v8-checkout/depot_tools):$$PATH gclient sync
