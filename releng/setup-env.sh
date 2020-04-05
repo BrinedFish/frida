@@ -296,12 +296,12 @@ case $host_platform in
   macos)
     macos_minver="10.9"
 
-    if [ -z "$MACOS_SDK" ]; then
-      macos_sdk="macosx"
+    macos_sdk="macosx"
+    if [ -z "$MACOS_SDK_ROOT" ]; then
+      macos_sdk_path="$(xcrun --sdk $macos_sdk --show-sdk-path)"
     else
-      macos_sdk="$MACOS_SDK"
+      macos_sdk_path="$MACOS_SDK_ROOT"
     fi
-    macos_sdk_path="$(xcrun --sdk $macos_sdk --show-sdk-path)"
 
     clang_cc="$(xcrun --sdk $macos_sdk -f clang)"
     clang_cxx="$(xcrun --sdk $macos_sdk -f clang++)"
@@ -385,18 +385,14 @@ case $host_platform in
   ios)
     ios_minver="7.0"
 
-    if [ -z "$IOS_SDK" ]; then
-      case $host_arch in
-        x86|x86_64)
-          ios_sdk="iphonesimulator"
-          ;;
-        *)
-          ios_sdk="iphoneos"
-          ;;
-      esac
-    else
-      ios_sdk="$IOS_SDK"
-    fi
+    case $host_arch in
+      x86|x86_64)
+        ios_sdk="iphonesimulator"
+        ;;
+      *)
+        ios_sdk="iphoneos"
+        ;;
+    esac
     ios_sdk_path="$(xcrun --sdk $ios_sdk --show-sdk-path)"
 
     clang_cc="$(xcrun --sdk $ios_sdk -f clang)"
