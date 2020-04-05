@@ -40,9 +40,9 @@ for code signing". You can use the name `frida-cert` instead of `gdb-cert`
 if you'd like.
 
 Next export the name of the created certificate to the environment variables
-`MAC_CERTID` and `IOS_CERTID`, and run `make`:
+`MACOS_CERTID` and `IOS_CERTID`, and run `make`:
 
-    export MAC_CERTID=frida-cert
+    export MACOS_CERTID=frida-cert
     export IOS_CERTID=frida-cert
     make
 

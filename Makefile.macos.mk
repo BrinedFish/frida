@@ -380,11 +380,11 @@ build/tmp-android-%/frida-core/.frida-helper-and-agent-stamp: build/tmp-android-
 	@touch $@
 
 build/.core-macos-stamp-%: build/%/lib/pkgconfig/frida-core-1.0.pc
-	@if [ -z "$$MAC_CERTID" ]; then echo "MAC_CERTID not set, see https://github.com/frida/frida#macos-and-ios"; exit 1; fi
+	@if [ -z "$$MACOS_CERTID" ]; then echo "MACOS_CERTID not set, see https://github.com/frida/frida#macos-and-ios"; exit 1; fi
 	. build/frida-meson-env-macos-$(build_arch).rc \
-		&& $$CODESIGN -f -s "$$MAC_CERTID" -i "re.frida.Server" build/$*/bin/frida-server \
+		&& $$CODESIGN -f -s "$$MACOS_CERTID" -i "re.frida.Server" build/$*/bin/frida-server \
 		&& $$INSTALL_NAME_TOOL -id @executable_path/../Frameworks/FridaGadget.dylib build/$*/lib/frida-gadget.dylib \
-		&& $$CODESIGN -f -s "$$MAC_CERTID" build/$*/lib/frida-gadget.dylib
+		&& $$CODESIGN -f -s "$$MACOS_CERTID" build/$*/lib/frida-gadget.dylib
 	@touch $@
 build/.core-ios-stamp-%: build/%/lib/pkgconfig/frida-core-1.0.pc
 	@if [ -z "$$IOS_CERTID" ]; then echo "IOS_CERTID not set, see https://github.com/frida/frida#macos-and-ios"; exit 1; fi
@@ -400,7 +400,7 @@ build/frida-macos-universal/lib/frida-gadget.dylib: build/.core-macos-stamp-frid
 	cp build/frida-macos-x86_64/lib/frida-gadget.dylib $(@D)/frida-gadget-x86_64.dylib
 	. build/frida-meson-env-macos-$(build_arch).rc \
 		&& $$LIPO $(@D)/frida-gadget-x86.dylib $(@D)/frida-gadget-x86_64.dylib -create -output $@.tmp \
-		&& $$CODESIGN -f -s "$$MAC_CERTID" $@.tmp
+		&& $$CODESIGN -f -s "$$MACOS_CERTID" $@.tmp
 	rm $(@D)/frida-gadget-*.dylib
 	mv $@.tmp $@
 build/frida-ios-universal/lib/frida-gadget.dylib: build/.core-ios-stamp-frida-ios-x86 build/.core-ios-stamp-frida-ios-x86_64 build/.core-ios-stamp-frida-ios-arm build/.core-ios-stamp-frida-ios-arm64 build/.core-ios-stamp-frida-ios-arm64e
