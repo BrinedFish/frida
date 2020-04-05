@@ -297,7 +297,11 @@ case $host_platform in
     macos_minver="10.9"
 
     macos_sdk="macosx"
-    macos_sdk_path="$(xcrun --sdk $macos_sdk --show-sdk-path)"
+    if [ -z "$MACOS_SDK_ROOT" ]; then
+      macos_sdk_path="$(xcrun --sdk $macos_sdk --show-sdk-path)"
+    else
+      macos_sdk_path="$MACOS_SDK_ROOT"
+    fi
 
     clang_cc="$(xcrun --sdk $macos_sdk -f clang)"
     clang_cxx="$(xcrun --sdk $macos_sdk -f clang++)"
