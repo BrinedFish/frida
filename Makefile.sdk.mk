@@ -557,6 +557,10 @@ ifeq ($(host_platform), android)
 	v8_libs_private := "-llog -lm"
 endif
 
+ifneq ($(MACOS_SDK_ROOT),)
+	v8_platform_args += mac_sdk_path="$(MACOS_SDK_ROOT)"
+endif
+
 gn:
 	# Google's prebuilt GN requires a newer glibc than our Debian Squeeze buildroot has.
 	git clone $(repo_base_url)/gn$(repo_suffix)
