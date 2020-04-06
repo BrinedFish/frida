@@ -455,6 +455,7 @@ v8_common_args := \
 	v8_enable_i18n_support=false \
 	v8_untrusted_code_mitigations=false \
 	treat_warnings_as_errors=false \
+	fatal_linker_warnings=false \
 	use_glib=false \
 	use_goma=false \
 	v8_embedder_string="-frida" \
