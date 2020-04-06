@@ -560,6 +560,9 @@ endif
 ifneq ($(MACOS_SDK_ROOT),)
 	v8_platform_args += mac_sdk_path="$(MACOS_SDK_ROOT)"
 endif
+ifneq ($(IOS_SDK_ROOT),)
+	v8_platform_args += ios_sdk_path="$(IOS_SDK_ROOT)"
+endif
 
 gn:
 	# Google's prebuilt GN requires a newer glibc than our Debian Squeeze buildroot has.

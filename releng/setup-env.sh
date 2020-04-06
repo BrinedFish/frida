@@ -393,7 +393,11 @@ case $host_platform in
         ios_sdk="iphoneos"
         ;;
     esac
-    ios_sdk_path="$(xcrun --sdk $ios_sdk --show-sdk-path)"
+    if [ -z "$IOS_SDK_ROOT" ]; then
+      ios_sdk_path="$(xcrun --sdk $ios_sdk --show-sdk-path)"
+    else
+      ios_sdk_path="$IOS_SDK_ROOT"
+    fi
 
     clang_cc="$(xcrun --sdk $ios_sdk -f clang)"
     clang_cxx="$(xcrun --sdk $ios_sdk -f clang++)"
